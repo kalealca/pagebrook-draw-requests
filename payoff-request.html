@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payoff Request Form — Pagebrook Capital</title>
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f4f6f9;
+      color: #414143;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 40px 16px 60px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(40,96,157,0.10);
+      width: 100%;
+      max-width: 600px;
+      padding: 40px 40px 44px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .header h1 {
+      font-size: 1.65rem;
+      font-weight: 700;
+      color: #28609d;
+      margin-bottom: 6px;
+    }
+
+    .header p {
+      font-size: 0.92rem;
+      color: #666;
+    }
+
+    /* Section headers */
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #28609d;
+      margin-bottom: 14px;
+      padding-bottom: 6px;
+      border-bottom: 2px solid #e8eef5;
+    }
+
+    .form-section {
+      margin-bottom: 28px;
+    }
+
+    /* Field groups */
+    .field {
+      margin-bottom: 18px;
+    }
+
+    .field:last-child { margin-bottom: 0; }
+
+    label {
+      display: block;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #414143;
+      margin-bottom: 6px;
+    }
+
+    label .req {
+      color: #ed2f6a;
+      margin-left: 2px;
+    }
+
+    label .hint {
+      font-weight: 400;
+      color: #888;
+      font-size: 0.82rem;
+      margin-left: 4px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #d0d7e2;
+      border-radius: 7px;
+      font-size: 0.95rem;
+      color: #414143;
+      background: #fff;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    input:focus {
+      border-color: #28609d;
+      box-shadow: 0 0 0 3px rgba(40,96,157,0.10);
+    }
+
+    input.error {
+      border-color: #ed2f6a;
+    }
+
+    .field-error {
+      font-size: 0.8rem;
+      color: #ed2f6a;
+      margin-top: 4px;
+      display: none;
+    }
+
+    .field-error.visible { display: block; }
+
+    /* Radio group */
+    .radio-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .radio-option {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      padding: 12px 14px;
+      border: 1.5px solid #d0d7e2;
+      border-radius: 8px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .radio-option:hover {
+      border-color: #28609d;
+      background: #f0f5fb;
+    }
+
+    .radio-option input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #28609d;
+      flex-shrink: 0;
+      margin-top: 2px;
+      cursor: pointer;
+    }
+
+    .radio-option.selected {
+      border-color: #28609d;
+      background: #f0f5fb;
+    }
+
+    .radio-label {
+      font-size: 0.93rem;
+      font-weight: 600;
+      color: #414143;
+    }
+
+    .radio-sublabel {
+      font-size: 0.82rem;
+      color: #666;
+      margin-top: 2px;
+    }
+
+    /* Conditional section */
+    .conditional-section {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height 0.35s ease, opacity 0.25s ease, margin 0.25s ease;
+      margin-bottom: 0;
+    }
+
+    .conditional-section.visible {
+      max-height: 500px;
+      opacity: 1;
+      margin-bottom: 28px;
+    }
+
+    .conditional-inner {
+      padding: 18px 20px 20px;
+      background: #f7f9fc;
+      border: 1.5px solid #d0d7e2;
+      border-radius: 9px;
+    }
+
+    .at-least-one-note {
+      font-size: 0.8rem;
+      color: #666;
+      margin-bottom: 14px;
+      margin-top: -4px;
+    }
+
+    /* Google Maps picker */
+    gmpx-place-picker { width: 100%; display: block; margin-top: 4px; }
+
+    /* Submit */
+    .submit-btn {
+      width: 100%;
+      padding: 13px;
+      background: #28609d;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 700;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      margin-top: 4px;
+    }
+
+    .submit-btn:hover { background: #1f4f88; }
+    .submit-btn:active { transform: scale(0.99); }
+    .submit-btn:disabled { background: #8aafd0; cursor: not-allowed; }
+
+    /* Thank you */
+    .thankyou {
+      display: none;
+      text-align: center;
+      padding: 20px 0 10px;
+    }
+
+    .thankyou.visible { display: block; }
+
+    .thankyou-icon {
+      width: 60px;
+      height: 60px;
+      background: #eaf2fb;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .thankyou-icon svg {
+      width: 30px;
+      height: 30px;
+    }
+
+    .thankyou h2 {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: #28609d;
+      margin-bottom: 14px;
+    }
+
+    .thankyou p {
+      font-size: 0.93rem;
+      color: #555;
+      line-height: 1.6;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    /* Divider */
+    .divider {
+      border: none;
+      border-top: 1.5px solid #e8eef5;
+      margin: 0 0 28px;
+    }
+
+    @media (max-width: 480px) {
+      .card { padding: 28px 20px 32px; }
+      .header h1 { font-size: 1.35rem; }
+    }
+  </style>
+</head>
+<body>
+
+<gmpx-api-loader key="AIzaSyDCNlkcUWToVFNAV03OwiHfouIvmo8UpUE" solution-channel="GMP_GE_placepicker_v2"></gmpx-api-loader>
+
+<div class="card">
+  <div class="header">
+    <h1>Payoff Request Form</h1>
+    <p>Pagebrook Capital</p>
+  </div>
+
+  <form id="payoffForm" novalidate>
+
+    <!-- REQUESTER INFO -->
+    <div class="form-section">
+      <div class="section-label">Requester Information</div>
+
+      <div class="field">
+        <label for="requesterName">Full Name <span class="req">*</span></label>
+        <input type="text" id="requesterName" placeholder="Your full name" autocomplete="name" />
+        <div class="field-error" id="requesterNameErr">Please enter your full name.</div>
+      </div>
+
+      <div class="field">
+        <label for="requesterEmail">
+          Email Address
+          <span class="hint">(at least one contact method required)</span>
+        </label>
+        <input type="email" id="requesterEmail" placeholder="you@example.com" autocomplete="email" />
+        <div class="field-error" id="requesterEmailErr">Please enter a valid email address.</div>
+      </div>
+
+      <div class="field">
+        <label for="requesterPhone">Phone Number</label>
+        <input type="tel" id="requesterPhone" placeholder="(555) 555-5555" autocomplete="tel" />
+        <div class="field-error" id="requesterPhoneErr">Please enter a valid phone number.</div>
+      </div>
+
+      <div class="field-error" id="requesterContactErr" style="margin-top:-10px; margin-bottom:8px;">
+        Please provide at least one contact method (email or phone).
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- REASON FOR REQUEST -->
+    <div class="form-section">
+      <div class="section-label">Reason for Request <span class="req" style="font-size:0.9rem;">*</span></div>
+
+      <div class="radio-group" id="reasonGroup">
+        <label class="radio-option" id="optionA">
+          <input type="radio" name="reason" value="informative" />
+          <div>
+            <div class="radio-label">Informative</div>
+            <div class="radio-sublabel">I want to know the payoff amount for informational purposes.</div>
+          </div>
+        </label>
+        <label class="radio-option" id="optionB">
+          <input type="radio" name="reason" value="preparation" />
+          <div>
+            <div class="radio-label">Preparation for Payoff</div>
+            <div class="radio-sublabel">I am preparing to pay off this loan and need the official payoff letter.</div>
+          </div>
+        </label>
+      </div>
+      <div class="field-error" id="reasonErr" style="margin-top:8px;">Please select a reason for your request.</div>
+    </div>
+
+    <!-- TITLE COMPANY (conditional) -->
+    <div class="conditional-section" id="titleSection">
+      <div class="conditional-inner">
+        <div class="section-label" style="margin-bottom:10px;">Title Company Information</div>
+        <p class="at-least-one-note">At least one contact method (phone or email) is required.</p>
+
+        <div class="field">
+          <label for="titleCompanyName">Title Company Name <span class="req">*</span></label>
+          <input type="text" id="titleCompanyName" placeholder="e.g. First American Title" />
+          <div class="field-error" id="titleCompanyNameErr">Please enter the title company name.</div>
+        </div>
+
+        <div class="field">
+          <label for="titlePhone">Title Company Phone <span class="hint">(at least one required)</span></label>
+          <input type="tel" id="titlePhone" placeholder="(555) 555-5555" />
+          <div class="field-error" id="titlePhoneErr">Please enter a valid phone number.</div>
+        </div>
+
+        <div class="field">
+          <label for="titleEmail">Title Company Email</label>
+          <input type="email" id="titleEmail" placeholder="contact@titlecompany.com" />
+          <div class="field-error" id="titleEmailErr">Please enter a valid email address.</div>
+        </div>
+
+        <div class="field-error" id="titleContactErr">
+          Please provide at least one contact method for the title company.
+        </div>
+      </div>
+    </div>
+
+    <hr class="divider" />
+
+    <!-- PROPERTY ADDRESS -->
+    <div class="form-section">
+      <div class="section-label">Property Information</div>
+
+      <div class="field">
+        <label for="propertyAddress">Property Address <span class="req">*</span></label>
+        <gmpx-place-picker id="propertyAddress" placeholder="Enter property address" country="US"></gmpx-place-picker>
+        <div class="field-error" id="propertyAddressErr">Please enter the property address.</div>
+      </div>
+
+      <div class="field">
+        <label for="payoffDate">Payoff Good Through <span class="req">*</span></label>
+        <input type="date" id="payoffDate" />
+        <div class="field-error" id="payoffDateErr">Please select a date.</div>
+      </div>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submitBtn">Submit Request</button>
+  </form>
+
+  <!-- THANK YOU -->
+  <div class="thankyou" id="thankYou">
+    <div class="thankyou-icon">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#28609d" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+    </div>
+    <h2>Thank You for Your Request</h2>
+    <p>
+      The payoff request will be sent to the borrower's registered email within 2 business days.
+      If the provided email is different than the one registered, Pagebrook Capital team will include
+      the requester in the communication at our own discretion.
+    </p>
+  </div>
+</div>
+
+<script>
+  const WEBHOOK_URL = 'https://kenleal.app.n8n.cloud/webhook/e990836e-aa81-48a8-880f-10fbf7f2b558';
+
+  // ── Radio styling ───────────────────────────────────────────────────────────
+  document.querySelectorAll('input[name="reason"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+      document.querySelectorAll('.radio-option').forEach(el => el.classList.remove('selected'));
+      radio.closest('.radio-option').classList.add('selected');
+      toggleTitleSection(radio.value === 'preparation');
+      clearError('reasonErr');
+    });
+  });
+
+  function toggleTitleSection(show) {
+    const section = document.getElementById('titleSection');
+    const inputs = section.querySelectorAll('input');
+    if (show) {
+      section.classList.add('visible');
+      inputs.forEach(i => i.removeAttribute('disabled'));
+    } else {
+      section.classList.remove('visible');
+      inputs.forEach(i => {
+        i.setAttribute('disabled', true);
+        i.value = '';
+        clearError(i.id + 'Err');
+      });
+      clearError('titleContactErr');
+    }
+  }
+
+  // ── Validation helpers ──────────────────────────────────────────────────────
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (msg) el.textContent = msg;
+    el.classList.add('visible');
+  }
+
+  function clearError(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('visible');
+  }
+
+  function markInput(id, isError) {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('error', isError);
+  }
+
+  function isValidEmail(val) {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(val.trim());
+  }
+
+  function isValidPhone(val) {
+    return val.replace(/\D/g, '').length >= 10;
+  }
+
+  function getAddressValue() {
+    const picker = document.getElementById('propertyAddress');
+    if (picker && picker.value) return picker.value;
+    // fallback: check the internal input
+    const inner = picker && picker.shadowRoot && picker.shadowRoot.querySelector('input');
+    return inner ? inner.value.trim() : '';
+  }
+
+  // ── Form submit ─────────────────────────────────────────────────────────────
+  document.getElementById('payoffForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    let valid = true;
+
+    // Requester name
+    const name = document.getElementById('requesterName').value.trim();
+    if (!name) {
+      showError('requesterNameErr'); markInput('requesterName', true); valid = false;
+    } else {
+      clearError('requesterNameErr'); markInput('requesterName', false);
+    }
+
+    // Requester email
+    const reqEmail = document.getElementById('requesterEmail').value.trim();
+    const reqPhone = document.getElementById('requesterPhone').value.trim();
+    let reqEmailOk = true, reqPhoneOk = true;
+
+    if (reqEmail && !isValidEmail(reqEmail)) {
+      showError('requesterEmailErr'); markInput('requesterEmail', true);
+      reqEmailOk = false; valid = false;
+    } else {
+      clearError('requesterEmailErr'); markInput('requesterEmail', false);
+    }
+
+    if (reqPhone && !isValidPhone(reqPhone)) {
+      showError('requesterPhoneErr'); markInput('requesterPhone', true);
+      reqPhoneOk = false; valid = false;
+    } else {
+      clearError('requesterPhoneErr'); markInput('requesterPhone', false);
+    }
+
+    // At least one requester contact
+    const hasReqContact = (reqEmail && reqEmailOk) || (reqPhone && reqPhoneOk);
+    if (!hasReqContact) {
+      showError('requesterContactErr'); valid = false;
+    } else {
+      clearError('requesterContactErr');
+    }
+
+    // Reason
+    const reason = document.querySelector('input[name="reason"]:checked');
+    if (!reason) {
+      showError('reasonErr'); valid = false;
+    } else {
+      clearError('reasonErr');
+    }
+
+    // Title company (only if B selected)
+    const isPreparation = reason && reason.value === 'preparation';
+    let titleName = '', titlePhone = '', titleEmail = '';
+
+    if (isPreparation) {
+      titleName = document.getElementById('titleCompanyName').value.trim();
+      titlePhone = document.getElementById('titlePhone').value.trim();
+      titleEmail = document.getElementById('titleEmail').value.trim();
+
+      if (!titleName) {
+        showError('titleCompanyNameErr'); markInput('titleCompanyName', true); valid = false;
+      } else {
+        clearError('titleCompanyNameErr'); markInput('titleCompanyName', false);
+      }
+
+      if (titlePhone && !isValidPhone(titlePhone)) {
+        showError('titlePhoneErr'); markInput('titlePhone', true); valid = false;
+      } else {
+        clearError('titlePhoneErr'); markInput('titlePhone', false);
+      }
+
+      if (titleEmail && !isValidEmail(titleEmail)) {
+        showError('titleEmailErr'); markInput('titleEmail', true); valid = false;
+      } else {
+        clearError('titleEmailErr'); markInput('titleEmail', false);
+      }
+
+      const hasTitleContact = (titlePhone && isValidPhone(titlePhone)) || (titleEmail && isValidEmail(titleEmail));
+      if (!hasTitleContact) {
+        showError('titleContactErr'); valid = false;
+      } else {
+        clearError('titleContactErr');
+      }
+    }
+
+    // Property address
+    const address = getAddressValue();
+    if (!address) {
+      showError('propertyAddressErr'); valid = false;
+    } else {
+      clearError('propertyAddressErr');
+    }
+
+    // Payoff date
+    const payoffDate = document.getElementById('payoffDate').value;
+    if (!payoffDate) {
+      showError('payoffDateErr'); markInput('payoffDate', true); valid = false;
+    } else {
+      clearError('payoffDateErr'); markInput('payoffDate', false);
+    }
+
+    if (!valid) return;
+
+    // Submit
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    const payload = {
+      requesterName: name,
+      requesterEmail: reqEmail || null,
+      requesterPhone: reqPhone || null,
+      reasonForRequest: reason.value === 'preparation' ? 'Preparation for Payoff' : 'Informative',
+      titleCompanyName: isPreparation ? titleName : null,
+      titleCompanyPhone: isPreparation ? (titlePhone || null) : null,
+      titleCompanyEmail: isPreparation ? (titleEmail || null) : null,
+      propertyAddress: address,
+      payoffGoodThrough: payoffDate,
+      submittedAt: new Date().toISOString()
+    };
+
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+    } catch (err) {
+      // Proceed to thank you even on network error — n8n may still receive it
+      console.warn('Webhook error:', err);
+    }
+
+    document.getElementById('payoffForm').style.display = 'none';
+    document.getElementById('thankYou').classList.add('visible');
+  });
+
+  // ── Live formatting ─────────────────────────────────────────────────────────
+  function formatPhone(input) {
+    input.addEventListener('input', () => {
+      const digits = input.value.replace(/\D/g, '').slice(0, 10);
+      if (digits.length <= 3) input.value = digits;
+      else if (digits.length <= 6) input.value = `(${digits.slice(0,3)}) ${digits.slice(3)}`;
+      else input.value = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6)}`;
+    });
+  }
+
+  formatPhone(document.getElementById('requesterPhone'));
+  formatPhone(document.getElementById('titlePhone'));
+</script>
+
+</body>
+</html>
