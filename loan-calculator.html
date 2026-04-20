@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagebrook Capital - Loan Calculator (Test)</title>
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f4f6f9;
+            color: #414143;
+            min-height: 100vh;
+            padding: 40px 16px 80px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1248px;
+            margin: 0 auto;
+        }
+
+        .step { display: none; }
+        .step.active { display: block; }
+
+        /* ── Back Button ── */
+        .back-button {
+            background: none;
+            border: none;
+            color: #28609d;
+            font-size: 0.88rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 0;
+            margin-bottom: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .back-button:hover { color: #1f4f88; }
+
+        /* ── Step 1: Product Selection ── */
+        .product-selection {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(40,96,157,0.10);
+            max-width: 936px;
+            margin: 0 auto;
+            padding: 40px 40px 44px;
+            text-align: center;
+        }
+        .product-selection h1 {
+            color: #28609d;
+            font-size: 1.65rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        .product-selection > p {
+            color: #666;
+            font-size: 0.92rem;
+            margin-bottom: 32px;
+        }
+        .product-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+        .product-card {
+            background: #fff;
+            border: 1.5px solid #d0d7e2;
+            color: #28609d;
+            padding: 24px 14px;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: border-color 0.2s, background 0.2s, color 0.2s, transform 0.15s;
+            text-align: center;
+            font-family: inherit;
+        }
+        .product-card:hover {
+            background: #28609d;
+            color: #fff;
+            border-color: #28609d;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 18px rgba(40,96,157,0.18);
+        }
+        .product-card .card-title {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .product-card .card-sub {
+            font-size: 0.82rem;
+            font-weight: 400;
+            opacity: 0.8;
+            line-height: 1.4;
+        }
+
+        /* ── Info Form (Construction / DSCR) ── */
+        .info-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(40,96,157,0.10);
+            padding: 40px;
+        }
+        .info-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 28px;
+        }
+        .info-form-grid .form-group.full { grid-column: 1 / -1; }
+        .info-card h2 {
+            color: #28609d;
+            font-size: 1.35rem;
+            font-weight: 700;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e8eef5;
+            margin-bottom: 10px;
+        }
+        .info-card .form-intro {
+            color: #666;
+            font-size: 0.88rem;
+            margin-bottom: 22px;
+            line-height: 1.5;
+        }
+        .thank-you { display: none; text-align: center; padding: 30px 0; }
+        .thank-you.show { display: block; }
+        .thank-you h3 { color: #28609d; font-size: 1.35rem; font-weight: 700; margin-bottom: 12px; }
+        .thank-you p { color: #555; font-size: 0.93rem; line-height: 1.6; }
+
+        /* ── Calculator Card ── */
+        .calculator-card {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 24px rgba(40,96,157,0.10);
+            overflow: hidden;
+        }
+
+        /* ── Program Tabs ── */
+        .program-tabs {
+            display: flex;
+            border-bottom: 2px solid #e8eef5;
+        }
+        .program-tab {
+            flex: 1;
+            padding: 16px 12px;
+            background: #f7f9fc;
+            border: none;
+            border-right: 1px solid #e8eef5;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            text-align: center;
+            font-family: inherit;
+        }
+        .program-tab:last-child { border-right: none; }
+        .program-tab .tab-name { font-size: 0.88rem; font-weight: 700; color: #666; }
+        .program-tab .tab-rate { font-size: 0.78rem; color: #999; margin-top: 4px; }
+        .program-tab.active { background: #fff; border-bottom: 2px solid #fff; margin-bottom: -2px; }
+        .program-tab.active .tab-name { color: #28609d; }
+        .program-tab.active .tab-rate { color: #28609d; }
+
+        /* ── Program Info Bar ── */
+        .program-info-bar {
+            background: #f0f5fb;
+            border-bottom: 1px solid #d0d7e2;
+            padding: 12px 24px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            font-size: 0.82rem;
+            color: #555;
+        }
+        .program-info-bar span strong { color: #28609d; }
+
+        /* ── Calculator Grid ── */
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+        .calc-col { padding: 30px 28px; }
+        .calc-col:first-child { border-right: 1px solid #e8eef5; }
+        .calc-col h2 {
+            color: #28609d;
+            font-size: 1.35rem;
+            font-weight: 700;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #e8eef5;
+            margin-bottom: 22px;
+        }
+
+        /* ── Form Elements ── */
+        .form-group { margin-bottom: 18px; }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            color: #414143;
+            font-weight: 600;
+            font-size: 0.88rem;
+        }
+        .label-with-help { display: flex; align-items: center; gap: 8px; }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1.5px solid #d0d7e2;
+            border-radius: 7px;
+            font-size: 0.95rem;
+            color: #414143;
+            background: #fff;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            font-family: inherit;
+            outline: none;
+        }
+        input:focus {
+            border-color: #28609d;
+            box-shadow: 0 0 0 3px rgba(40,96,157,0.10);
+        }
+        input.field-error { border-color: #ed2f6a; }
+
+        .help-button {
+            background: #28609d;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+        .help-button:hover { background: #1f4f88; }
+
+        .help-text {
+            display: none;
+            background: #f0f5fb;
+            border-left: 3px solid #28609d;
+            padding: 11px 13px;
+            margin-top: 8px;
+            font-size: 0.82rem;
+            line-height: 1.55;
+            color: #555;
+            border-radius: 0 5px 5px 0;
+        }
+        .help-text.show { display: block; }
+
+        .field-hint {
+            font-size: 0.78rem;
+            margin-top: 5px;
+            padding: 7px 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .field-hint.show { display: block; }
+        .field-hint.info { background: #f0f5fb; color: #28609d; border-left: 3px solid #28609d; }
+        .field-hint.warning { background: #fff3f3; color: #c0392b; border-left: 3px solid #ed2f6a; }
+
+        .error-msg {
+            color: #ed2f6a;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            display: none;
+        }
+        .error-msg.show { display: block; }
+
+        .action-button {
+            background: #28609d;
+            color: #fff;
+            border: none;
+            padding: 13px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.2s, transform 0.1s;
+            margin-top: 18px;
+            font-family: inherit;
+        }
+        .action-button:hover { background: #1f4f88; }
+        .action-button:active { transform: scale(0.99); }
+        .action-button:disabled { background: #8aafd0; cursor: not-allowed; }
+        .action-button.secondary {
+            background: #e8eef5;
+            color: #414143;
+            margin-top: 10px;
+        }
+        .action-button.secondary:hover {
+            background: #d0d7e2;
+            color: #414143;
+        }
+
+        /* ── Checkbox ── */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-top: 16px;
+            padding: 12px;
+            background: #f7f9fc;
+            border-radius: 7px;
+        }
+        .checkbox-group input[type="checkbox"] {
+            margin-top: 2px;
+            width: 17px;
+            height: 17px;
+            cursor: pointer;
+            accent-color: #28609d;
+            flex-shrink: 0;
+        }
+        .checkbox-group label {
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: #555;
+            font-weight: 400;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        /* ── Results ── */
+        .results-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            color: #aab4c0;
+            font-size: 0.93rem;
+            text-align: center;
+            padding: 30px;
+        }
+        .results-content { display: none; }
+        .results-content.show { display: block; }
+
+        .result-item {
+            background: #f7f9fc;
+            padding: 14px 16px;
+            border-radius: 7px;
+            margin-bottom: 12px;
+            border-left: 4px solid #28609d;
+        }
+        .result-item h3 {
+            color: #414143;
+            font-size: 0.88rem;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .result-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #28609d;
+            margin-bottom: 6px;
+        }
+        .result-breakdown {
+            font-size: 0.83rem;
+            color: #666;
+            line-height: 1.8;
+            padding-left: 4px;
+        }
+        .result-note {
+            font-size: 0.78rem;
+            color: #999;
+            font-style: italic;
+            margin-top: 6px;
+        }
+
+        .disclaimers {
+            margin-top: 16px;
+            padding: 14px 16px;
+            background: #fff9e6;
+            border-radius: 7px;
+            border-left: 4px solid #f0a500;
+        }
+        .disclaimers p {
+            font-size: 0.75rem;
+            color: #777;
+            line-height: 1.6;
+            margin-bottom: 4px;
+        }
+        .disclaimers p:last-child { margin-bottom: 0; }
+
+        /* ── Contact CTA (full-width, below calculator card) ── */
+        .contact-cta {
+            display: none;
+            margin-top: 20px;
+            padding: 28px 32px;
+            background: #f0f5fb;
+            border-radius: 10px;
+            border: 1px solid #d0d7e2;
+        }
+        .contact-cta.show { display: block; }
+        .contact-cta h3 {
+            color: #28609d;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .contact-cta > p {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .contact-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 28px;
+        }
+        .contact-form-grid .form-group.full { grid-column: 1 / -1; }
+        .contact-submitted { display: none; text-align: center; padding: 16px; }
+        .contact-submitted.show { display: block; }
+        .contact-submitted p { color: #28609d; font-weight: 600; font-size: 0.93rem; }
+
+        /* ── Address picker ── */
+        gmpx-place-picker { width: 100%; display: block; margin-top: 4px; }
+        .address-msg { font-size: 0.8rem; margin-top: 6px; min-height: 18px; }
+        .address-msg.valid { color: #27ae60; }
+        .address-msg.invalid { color: #ed2f6a; }
+        .address-msg.neutral { color: #aab4c0; }
+
+        /* ── Footer ── */
+        .footer {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #414143;
+            color: #fff;
+            text-align: center;
+            padding: 14px;
+            font-size: 0.78rem;
+            z-index: 100;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .product-cards { grid-template-columns: 1fr; }
+            .calculator-grid { grid-template-columns: 1fr; }
+            .calc-col:first-child { border-right: none; border-bottom: 1px solid #e8eef5; }
+            .program-info-bar { gap: 10px; }
+            .info-form-grid { grid-template-columns: 1fr; }
+            .contact-form-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 500px) {
+            .product-selection, .info-card { padding: 28px 20px 32px; }
+            .product-selection h1 { font-size: 1.35rem; }
+            .program-tab { padding: 12px 6px; }
+            .program-tab .tab-name { font-size: 0.78rem; }
+        }
+    </style>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/@googlemaps/extended-component-library/0.6.11/index.min.js"></script>
+</head>
+<body>
+    <gmpx-api-loader key="AIzaSyDCNlkcUWToVFNAV03OwiHfouIvmo8UpUE" solution-channel="GMP_GE_placepicker_v2"></gmpx-api-loader>
+
+    <div class="container">
+
+        <!-- ════ STEP 1: Product Selection ════ -->
+        <div id="step1" class="step active">
+            <div class="product-selection">
+                <h1>Welcome to Pagebrook Capital</h1>
+                <p>What type of loan product are you looking for?</p>
+                <div class="product-cards">
+                    <button class="product-card" onclick="selectProduct('fixflip')">
+                        <div class="card-title">Fix &amp; Flip</div>
+                        <div class="card-sub">Asset-based &amp; underwritten loan programs with instant estimates</div>
+                    </button>
+                    <button class="product-card" onclick="selectProduct('construction')">
+                        <div class="card-title">Construction Loan</div>
+                        <div class="card-sub">Ground-up construction financing</div>
+                    </button>
+                    <button class="product-card" onclick="selectProduct('dscr')">
+                        <div class="card-title">DSCR Loan</div>
+                        <div class="card-sub">Debt service coverage ratio rental financing</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════ STEP 2: Info Collection (Construction / DSCR) ════ -->
+        <div id="stepInfo" class="step">
+            <button class="back-button" onclick="goBack()">← Back</button>
+            <div class="info-card">
+                <h2 id="infoTitle">Construction Loan</h2>
+
+                <div id="infoFormWrap">
+                    <p class="form-intro">Please provide your information below and a team member will contact you within 24 business hours.</p>
+                    <form id="infoForm" novalidate>
+                        <div class="info-form-grid">
+                            <div class="form-group">
+                                <label for="infoName">Full Name *</label>
+                                <input type="text" id="infoName" placeholder="John Smith">
+                                <div class="error-msg" id="infoNameErr">Please enter your full name</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="infoPhone">Phone Number *</label>
+                                <input type="tel" id="infoPhone" placeholder="+1-234-567-8900">
+                                <div class="error-msg" id="infoPhoneErr">Phone must be 9–20 characters (numbers, +, - only)</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="infoEmail">Email *</label>
+                                <input type="email" id="infoEmail" placeholder="user@domain.com">
+                                <div class="error-msg" id="infoEmailErr">Please enter a valid email address</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="infoCreditScore">Credit Score *</label>
+                                <input type="number" id="infoCreditScore" placeholder="e.g. 720" min="300" max="850">
+                                <div class="error-msg" id="infoCreditErr">Please enter a valid credit score (300–850)</div>
+                                <div class="field-hint warning" id="dscrCreditHint">A minimum credit score of 640 is required for DSCR loans</div>
+                            </div>
+                            <!-- DSCR-only experience fields -->
+                            <div class="form-group" id="dscrExperienceGroup" style="display:none;">
+                                <label for="infoExpNewBuilds">Years of experience with new builds</label>
+                                <input type="number" id="infoExpNewBuilds" placeholder="e.g. 3" min="0" max="99">
+                            </div>
+                            <div class="form-group" id="dscrExperienceGroup2" style="display:none;">
+                                <label for="infoExpRenovations">Years of experience with heavy renovations</label>
+                                <input type="number" id="infoExpRenovations" placeholder="e.g. 5" min="0" max="99">
+                            </div>
+                            <div class="form-group full" id="dscrExperienceNote" style="display:none;">
+                                <div class="field-hint info show">At least one business partner within the LLC requires proven experience in one of these fields to qualify.</div>
+                            </div>
+                            <div class="form-group full">
+                                <label>Property Address</label>
+                                <gmpx-place-picker id="infoAddress" placeholder="Enter property address (optional)" country="US"></gmpx-place-picker>
+                                <div class="address-msg neutral" id="infoAddressMsg"></div>
+                            </div>
+                            <div class="form-group full">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="infoConsent">
+                                    <label for="infoConsent">By checking this box, I consent to Pagebrook Capital collecting my contact information and contacting me about investment opportunities and services via email, phone, or text.</label>
+                                </div>
+                                <div class="error-msg" id="infoConsentErr">You must agree to continue</div>
+                            </div>
+                        </div>
+                        <button type="submit" class="action-button">Submit Information</button>
+                    </form>
+                </div>
+
+                <div class="thank-you" id="infoThankYou">
+                    <h3>Thank you!</h3>
+                    <p>Thank you for providing your information. A team member will be contacting you within 24 business hours.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ════ STEP 3: Fix & Flip Calculator ════ -->
+        <div id="stepCalc" class="step">
+            <button class="back-button" onclick="goBack()">← Back</button>
+            <div class="calculator-card">
+
+                <!-- Program Tabs -->
+                <div class="program-tabs">
+                    <button class="program-tab active" id="tab1" onclick="selectProgram(1)">
+                        <div class="tab-name">Program 1</div>
+                        <div class="tab-rate">10% + 3 Points</div>
+                    </button>
+                    <button class="program-tab" id="tab2" onclick="selectProgram(2)">
+                        <div class="tab-name">Program 2</div>
+                        <div class="tab-rate">14% + 3 Points</div>
+                    </button>
+                    <button class="program-tab" id="tab3" onclick="selectProgram(3)">
+                        <div class="tab-name">Program 3</div>
+                        <div class="tab-rate">18% Asset-Based</div>
+                    </button>
+                </div>
+
+                <!-- Program Info Bar -->
+                <div class="program-info-bar" id="programInfoBar"></div>
+
+                <!-- Calculator Grid -->
+                <div class="calculator-grid">
+
+                    <!-- Left: Inputs -->
+                    <div class="calc-col">
+                        <h2>Loan Details</h2>
+                        <form id="loanForm" novalidate>
+                            <div class="form-group">
+                                <label for="purchasePrice">Estimated Property Purchase Price *</label>
+                                <input type="text" id="purchasePrice" placeholder="$0,000,000.00">
+                                <div class="error-msg" id="purchasePriceErr">Minimum purchase price is $30,000</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="rehabCost">Estimated Rehabilitation Cost *</label>
+                                <input type="text" id="rehabCost" placeholder="$0,000,000.00">
+                            </div>
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <label for="arv">ARV (After Repairs Value) *</label>
+                                    <button type="button" class="help-button" onclick="toggleHelp('arvHelp')">?</button>
+                                </div>
+                                <div class="help-text" id="arvHelp">
+                                    To calculate your ARV, find 3–5 comparable properties sold within the last 3–6 months that are similar in size, location, and condition to your property after renovations. Calculate the average price per square foot and multiply by your property's square footage. Contact us if you need help.
+                                </div>
+                                <input type="text" id="arv" placeholder="$0,000,000.00">
+                                <div class="error-msg" id="arvErr">Minimum ARV is $50,000</div>
+                            </div>
+                            <button type="submit" class="action-button">Calculate Loan</button>
+                        </form>
+                    </div>
+
+                    <!-- Right: Results -->
+                    <div class="calc-col">
+                        <h2>Your Results</h2>
+                        <div class="results-placeholder" id="resultsPlaceholder">
+                            Complete the form and click "Calculate Loan" to see your results
+                        </div>
+                        <div class="results-content" id="resultsContent">
+                            <div class="result-item">
+                                <h3>Estimated Maximum Loan</h3>
+                                <div class="result-value" id="resMaxLoan"></div>
+                                <div class="result-breakdown">
+                                    <strong>Initial Funding:</strong> <span id="resInitialFunding"></span><br>
+                                    <strong>Rehab Holdback:</strong> <span id="resRehabHoldback"></span>
+                                    <div class="result-note">Released in draws after completion of construction milestones</div>
+                                </div>
+                            </div>
+                            <div class="result-item">
+                                <h3>Required Down Payment</h3>
+                                <div class="result-value" id="resDownPayment"></div>
+                                <div class="result-note" id="resDownPaymentNote"></div>
+                            </div>
+                            <div class="result-item">
+                                <h3>Estimated Fees</h3>
+                                <div class="result-breakdown">
+                                    <strong>Loan Origination Fee:</strong> <span id="resOriginationFee"></span><br>
+                                    <strong>Administrative Fee:</strong> $1,785.00<br>
+                                    <strong>Total Fees:</strong> <span id="resTotalFees"></span>
+                                </div>
+                            </div>
+                            <div class="result-item">
+                                <h3>Estimated Interest Payment</h3>
+                                <div class="result-breakdown">
+                                    <strong>Monthly Interest:</strong> <span id="resMonthly"></span><br>
+                                    <strong>Per Diem Interest:</strong> <span id="resPerDiem"></span>
+                                </div>
+                            </div>
+                            <div class="disclaimers">
+                                <p>*This is an estimation only. Actual amounts must be confirmed with your loan originator.</p>
+                                <p>**Prepaid interest (from closing date to end of month) will be due at closing.</p>
+                                <p>***Normal loan closing costs will apply.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact CTA (full-width, below calculator card) -->
+            <div class="contact-cta" id="contactCta">
+                <h3>Interested in this offer?</h3>
+                <p>Submit your contact information below and a team member will reach out to discuss next steps.</p>
+                <div id="contactFormWrap">
+                    <form id="contactForm" novalidate>
+                        <div class="contact-form-grid">
+                            <div class="form-group">
+                                <label for="contactName">Full Name *</label>
+                                <input type="text" id="contactName" placeholder="John Smith">
+                                <div class="error-msg" id="contactNameErr">Please enter your full name</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactPhone">Phone Number *</label>
+                                <input type="tel" id="contactPhone" placeholder="+1-234-567-8900">
+                                <div class="error-msg" id="contactPhoneErr">Phone must be 9–20 characters (numbers, +, - only)</div>
+                            </div>
+                            <div class="form-group">
+                                <label for="contactEmail">Email *</label>
+                                <input type="email" id="contactEmail" placeholder="user@domain.com">
+                                <div class="error-msg" id="contactEmailErr">Please enter a valid email address</div>
+                            </div>
+                            <div class="form-group full">
+                                <label>Property Address</label>
+                                <gmpx-place-picker id="contactAddress" placeholder="Enter property address (optional)" country="US"></gmpx-place-picker>
+                                <div class="address-msg neutral" id="contactAddressMsg"></div>
+                            </div>
+                            <div class="form-group full">
+                                <div class="checkbox-group">
+                                    <input type="checkbox" id="contactConsent">
+                                    <label for="contactConsent">By checking this box, I consent to Pagebrook Capital collecting my contact information and contacting me about investment opportunities and services via email, phone, or text.</label>
+                                </div>
+                                <div class="error-msg" id="contactConsentErr">You must agree to continue</div>
+                            </div>
+                        </div>
+                        <button type="submit" class="action-button" style="margin-top:14px;">Submit</button>
+                    </form>
+                </div>
+                <div class="contact-submitted" id="contactSubmitted">
+                    <p>Thank you! A team member will be contacting you within 24 business hours.</p>
+                </div>
+            </div>
+
+            <button type="button" class="action-button secondary" id="resetBtn" style="display:none;" onclick="resetCalculator()">
+                New Loan Estimation
+            </button>
+        </div>
+
+    </div>
+
+    <div class="footer">© 2026 Pagebrook Capital Inc. All rights reserved.</div>
+
+    <script>
+        const WEBHOOK_URL = 'https://kenleal.app.n8n.cloud/webhook/e4c11fa2-c110-4a3e-add3-a670847902fd';
+
+        const PROGRAMS = {
+            1: {
+                label: 'Mixed Underwriting Requirements — 10% + 3 Points',
+                rateLabel: '10%',
+                rate: 0.10,
+                origination: 0.03,
+                adminFee: 1785,
+                downPct: 0.20,
+                downLabel: '20% of purchase price'
+            },
+            2: {
+                label: 'Mixed Underwriting Requirements — 14% + 3 Points',
+                rateLabel: '14%',
+                rate: 0.14,
+                origination: 0.03,
+                adminFee: 1785,
+                downPct: 0.10,
+                downLabel: '10% of purchase price'
+            },
+            3: {
+                label: '100% Asset-Based — 18%',
+                rateLabel: '18%',
+                rate: 0.18,
+                origination: 0,
+                adminFee: 1785,
+                downPct: 0.10,
+                downLabel: '10% of purchase price'
+            }
+        };
+
+        let selectedProduct = '';
+        let selectedProgram = 1;
+        let calcData = {};
+        let infoPlace = null;
+        let contactPlace = null;
+
+        // ── Navigation ──────────────────────────────────────────────
+        function showStep(id) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function goBack() { showStep('step1'); }
+
+        // ── Product Selection ────────────────────────────────────────
+        function selectProduct(type) {
+            selectedProduct = type;
+            if (type === 'fixflip') {
+                selectProgram(1);
+                setupAddressPicker('contactAddress', 'contactAddressMsg', 'contact');
+                showStep('stepCalc');
+            } else {
+                const titles = { construction: 'Construction Loan', dscr: 'DSCR Loan' };
+                document.getElementById('infoTitle').textContent = titles[type];
+                document.getElementById('infoFormWrap').style.display = 'block';
+                document.getElementById('infoThankYou').classList.remove('show');
+                document.getElementById('infoForm').reset();
+                infoPlace = null;
+                clearErrors('infoForm');
+                // Show DSCR credit score minimum hint
+                const dscrHint = document.getElementById('dscrCreditHint');
+                dscrHint.classList.toggle('show', type === 'dscr');
+                // Show Construction experience fields
+                const isConstruction = type === 'construction';
+                document.getElementById('dscrExperienceGroup').style.display = isConstruction ? 'block' : 'none';
+                document.getElementById('dscrExperienceGroup2').style.display = isConstruction ? 'block' : 'none';
+                document.getElementById('dscrExperienceNote').style.display = isConstruction ? 'block' : 'none';
+                setupAddressPicker('infoAddress', 'infoAddressMsg', 'info');
+                showStep('stepInfo');
+            }
+        }
+
+        // ── Program Tabs ─────────────────────────────────────────────
+        function selectProgram(num) {
+            selectedProgram = num;
+            const prog = PROGRAMS[num];
+
+            [1, 2, 3].forEach(n => {
+                document.getElementById('tab' + n).classList.toggle('active', n === num);
+            });
+
+            // Info bar
+            const origText = prog.origination > 0 ? (prog.origination * 100) + '%' : 'None';
+            document.getElementById('programInfoBar').innerHTML =
+                `<span>${prog.label}</span>` +
+                `<span><strong>Rate:</strong> ${prog.rateLabel}</span>` +
+                `<span><strong>Origination:</strong> ${origText}</span>` +
+                `<span><strong>Admin Fee:</strong> $1,785</span>` +
+                `<span><strong>Min Down:</strong> ${prog.downLabel}</span>`;
+
+            resetResults();
+        }
+
+        // ── Address Picker ───────────────────────────────────────────
+        function setupAddressPicker(pickerId, msgId, type) {
+            const picker = document.getElementById(pickerId);
+            if (!picker) return;
+            const handleChange = () => {
+                setTimeout(() => {
+                    const place = picker.value;
+                    if (place && place.formattedAddress) {
+                        if (type === 'info') infoPlace = place;
+                        else contactPlace = place;
+                        const el = document.getElementById(msgId);
+                        el.textContent = '✓ ' + place.formattedAddress;
+                        el.className = 'address-msg valid';
+                    }
+                }, 100);
+            };
+            ['gmpx_placechange', 'change', 'blur'].forEach(e => picker.addEventListener(e, handleChange));
+        }
+
+        // ── Currency ─────────────────────────────────────────────────
+        function formatCurrency(input) {
+            let value = input.value.replace(/[^0-9.]/g, '');
+            const parts = value.split('.');
+            if (parts.length > 2) value = parts[0] + '.' + parts.slice(1).join('');
+            if (parts[1] && parts[1].length > 2) value = parts[0] + '.' + parts[1].substring(0, 2);
+            const num = parseFloat(value) || 0;
+            input.value = '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+        function parseCurrency(str) { return parseFloat(str.replace(/[^0-9.]/g, '')) || 0; }
+        function fmt(num) { return '$' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+        ['purchasePrice', 'rehabCost', 'arv'].forEach(id => {
+            document.getElementById(id).addEventListener('blur', function () { formatCurrency(this); });
+        });
+
+        // ── Helpers ──────────────────────────────────────────────────
+        function clearErrors(formId) {
+            document.querySelectorAll('#' + formId + ' .error-msg').forEach(el => el.classList.remove('show'));
+        }
+        function toggleHelp(id) { document.getElementById(id).classList.toggle('show'); }
+
+        // ── Loan Calculation ─────────────────────────────────────────
+        document.getElementById('loanForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            clearErrors('loanForm');
+
+            const prog = PROGRAMS[selectedProgram];
+            const purchasePrice = parseCurrency(document.getElementById('purchasePrice').value);
+            const rehabCost = parseCurrency(document.getElementById('rehabCost').value);
+            const arv = parseCurrency(document.getElementById('arv').value);
+
+            let valid = true;
+
+            if (purchasePrice < 30000) {
+                document.getElementById('purchasePriceErr').classList.add('show');
+                valid = false;
+            }
+            if (arv < 50000) {
+                document.getElementById('arvErr').textContent = 'Minimum ARV is $50,000';
+                document.getElementById('arvErr').classList.add('show');
+                valid = false;
+            } else if (purchasePrice > 0 && arv < (purchasePrice + rehabCost) * 1.1) {
+                document.getElementById('arvErr').textContent = 'ARV must be at least 10% higher than the sum of purchase price and rehabilitation cost';
+                document.getElementById('arvErr').classList.add('show');
+                valid = false;
+            }
+            if (!valid) return;
+
+            // Core calculations
+            // maxLoan = lesser of: 65% of ARV  OR  total cost minus required down payment
+            const totalCost = purchasePrice + rehabCost;
+            const arvCap = arv * 0.65;
+            const rehabHoldback = rehabCost;
+
+            const reqDown = purchasePrice * prog.downPct;
+            const maxLoanVal = Math.min(arvCap, totalCost - reqDown);
+            const maxLoanDisplay = fmt(maxLoanVal);
+            const initFundDisplay = fmt(Math.max(0, maxLoanVal - rehabCost));
+            const downDisplay = fmt(totalCost - maxLoanVal);
+            const downNote = prog.downLabel;
+            const originationFee = maxLoanVal * prog.origination;
+            const totalFees = originationFee + prog.adminFee;
+            const monthlyDisplay = fmt((maxLoanVal * prog.rate) / 12);
+            const perDiemDisplay = fmt((maxLoanVal * prog.rate) / 360);
+
+            calcData = {
+                productType: 'fixflip',
+                program: selectedProgram,
+                programLabel: prog.label,
+                purchasePrice, rehabCost, arv,
+                maxLoan: maxLoanDisplay,
+                initialFunding: initFundDisplay,
+                rehabHoldback: fmt(rehabHoldback),
+                downPayment: downDisplay,
+                originationFee: fmt(originationFee),
+                totalFees: fmt(totalFees),
+                monthlyInterest: monthlyDisplay,
+                perDiem: perDiemDisplay
+            };
+
+            // Populate results
+            document.getElementById('resMaxLoan').textContent = maxLoanDisplay;
+            document.getElementById('resInitialFunding').textContent = initFundDisplay;
+            document.getElementById('resRehabHoldback').textContent = fmt(rehabHoldback);
+            document.getElementById('resDownPayment').textContent = downDisplay;
+            document.getElementById('resDownPaymentNote').textContent = downNote;
+            document.getElementById('resOriginationFee').textContent = fmt(originationFee);
+            document.getElementById('resTotalFees').textContent = fmt(totalFees);
+            document.getElementById('resMonthly').textContent = monthlyDisplay;
+            document.getElementById('resPerDiem').textContent = perDiemDisplay;
+
+            document.getElementById('resultsPlaceholder').style.display = 'none';
+            document.getElementById('resultsContent').classList.add('show');
+            document.getElementById('contactCta').classList.add('show');
+            document.getElementById('resetBtn').style.display = 'block';
+
+            if (window.innerWidth <= 720) {
+                document.getElementById('resultsContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+
+        // ── Info Form (Construction / DSCR) ──────────────────────────
+        document.getElementById('infoForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            clearErrors('infoForm');
+
+            const name = document.getElementById('infoName').value.trim();
+            const phone = document.getElementById('infoPhone').value.trim();
+            const email = document.getElementById('infoEmail').value.trim();
+            const credit = document.getElementById('infoCreditScore').value.trim();
+            const consent = document.getElementById('infoConsent').checked;
+            let valid = true;
+
+            if (!name) { document.getElementById('infoNameErr').classList.add('show'); valid = false; }
+            if (!(/^[0-9+\-]{9,20}$/.test(phone))) { document.getElementById('infoPhoneErr').classList.add('show'); valid = false; }
+            if (!(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) { document.getElementById('infoEmailErr').classList.add('show'); valid = false; }
+            const creditNum = parseInt(credit);
+            if (!credit || isNaN(creditNum) || creditNum < 300 || creditNum > 850) {
+                document.getElementById('infoCreditErr').textContent = 'Please enter a valid credit score (300–850)';
+                document.getElementById('infoCreditErr').classList.add('show'); valid = false;
+            } else if (selectedProduct === 'dscr' && creditNum < 640) {
+                document.getElementById('infoCreditErr').textContent = 'A minimum credit score of 640 is required for DSCR loans';
+                document.getElementById('infoCreditErr').classList.add('show'); valid = false;
+            }
+            if (!consent) { document.getElementById('infoConsentErr').classList.add('show'); valid = false; }
+            if (!valid) return;
+
+            const data = {
+                productType: selectedProduct,
+                contactInfo: {
+                    fullName: name, phone, email, creditScore: creditNum,
+                    propertyAddress: infoPlace ? (infoPlace.formattedAddress || '') : '',
+                    consent, timestamp: new Date().toISOString(),
+                    ...(selectedProduct === 'construction' && {
+                        expNewBuilds: parseInt(document.getElementById('infoExpNewBuilds').value) || 0,
+                        expRenovations: parseInt(document.getElementById('infoExpRenovations').value) || 0
+                    })
+                }
+            };
+            fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+                .catch(err => console.error('Webhook error:', err));
+
+            document.getElementById('infoFormWrap').style.display = 'none';
+            document.getElementById('infoThankYou').classList.add('show');
+        });
+
+        // ── Contact Form (Fix & Flip) ────────────────────────────────
+        document.getElementById('contactForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            clearErrors('contactForm');
+
+            const name = document.getElementById('contactName').value.trim();
+            const phone = document.getElementById('contactPhone').value.trim();
+            const email = document.getElementById('contactEmail').value.trim();
+            const consent = document.getElementById('contactConsent').checked;
+            let valid = true;
+
+            if (!name) { document.getElementById('contactNameErr').classList.add('show'); valid = false; }
+            if (!(/^[0-9+\-]{9,20}$/.test(phone))) { document.getElementById('contactPhoneErr').classList.add('show'); valid = false; }
+            if (!(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))) { document.getElementById('contactEmailErr').classList.add('show'); valid = false; }
+            if (!consent) { document.getElementById('contactConsentErr').classList.add('show'); valid = false; }
+            if (!valid) return;
+
+            const data = {
+                ...calcData,
+                contactInfo: {
+                    fullName: name, phone, email,
+                    propertyAddress: contactPlace ? (contactPlace.formattedAddress || '') : '',
+                    consent, timestamp: new Date().toISOString()
+                }
+            };
+            fetch(WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data) })
+                .catch(err => console.error('Webhook error:', err));
+
+            document.getElementById('contactFormWrap').style.display = 'none';
+            document.getElementById('contactSubmitted').classList.add('show');
+        });
+
+        // ── Reset ─────────────────────────────────────────────────────
+        function resetResults() {
+            document.getElementById('resultsPlaceholder').style.display = 'flex';
+            document.getElementById('resultsContent').classList.remove('show');
+            document.getElementById('contactCta').classList.remove('show');
+            document.getElementById('resetBtn').style.display = 'none';
+            document.getElementById('contactFormWrap').style.display = 'block';
+            document.getElementById('contactSubmitted').classList.remove('show');
+        }
+
+        function resetCalculator() {
+            document.getElementById('loanForm').reset();
+            document.getElementById('contactForm').reset();
+            clearErrors('loanForm');
+            clearErrors('contactForm');
+            contactPlace = null;
+            calcData = {};
+            resetResults();
+            selectProgram(selectedProgram);
+        }
+    </script>
+</body>
+</html>
